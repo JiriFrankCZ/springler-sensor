@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
@@ -14,6 +15,8 @@ const char* MQTT_PASSWORD = "";
 
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
+StaticJsonBuffer<200> jsonBuffer;
+
 
 
 void mqttReconnect(){
@@ -77,4 +80,18 @@ void loop() {
     mqttReconnect();
   }
   mqttClient.loop();
+
+  // Create the root object
+
+JsonObject& root = jsonBuffer.createObject();
+   root["sensorType"] = "TEMPERATURE";
+   root["value"] = "10.0";
+   root["location"] = "OPENED";
+
+
+   char jsonChar[100];
+   root.printTo(jsonChar);
+
+   mqttClient.publish("springler/measurings", jsonChar);
+
 }
